@@ -1,34 +1,34 @@
-import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
+// import './style.css'
 import { setupCounter } from './counter.ts'
+
+// WARNING: Global State Refactor Later!
+let todos = 0
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
     <button id="expense-adder"> + </button>
     <div id="expenses"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th> Name </th>
+          <th> Amount </th>
+          <th> Description </th>
+          <th> Actions </th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
   </div>
 `
-
 
 const expense = (name: string, amount: string, desc: string) => `
   <div>
     <h2> ${name} </h2>
     <h3> Amount: <span> ${amount} </span> </h3>
-    <p> Description: <span> ${desc} </span> </p>
+    <p> Description: <span> ${desc.trim()} </span> </p>
     <button data-edit="delete"> Remove Expense </button>
     <button data-edit="edit"> Edit </button>
   </div>
@@ -43,12 +43,25 @@ const editable_expense = (name: string, amount: number, desc: string) => `
     <input type="number" name="amount" value="${amount}"/>
     <br>
     <label for="description"> Description: </label>
-    <textarea name="description">${desc}</textarea>
+    <textarea name="description">${desc.trim()}</textarea>
     <br>
     <button data-edit="delete"> Remove Expense </button>
     <button data-edit="save"> Save </button>
   </form>
 `
+
+const expense_row_template = (name: string, amount: number | string, desc: string) => `
+  <tr>
+    <td> ${name} </td>
+    <td> ${amount} </td>
+    <td> ${desc} </td>
+    <td>
+      <button> Edit </button>
+      <button> Delete </button>
+    </td>
+  </tr>
+`
+
 
 function remove_expense(e: Event) {
   const elem = e.target as HTMLButtonElement
@@ -61,7 +74,7 @@ function save_expense(e: Event) {
   const form = elem.closest('form')
   const name = (form!.querySelector('[name="name"]')! as HTMLInputElement).value
   const amount = (form!.querySelector('[name="amount"]')! as HTMLInputElement).value
-  const desc = (form!.querySelector('[name="description"]')! as HTMLInputElement).value
+  const desc = (form!.querySelector('[name="description"]')! as HTMLInputElement).value!
   form!.insertAdjacentHTML('beforebegin', expense(name, amount, desc))
   form?.querySelector('[data-edit="delete"]')?.removeEventListener('click', remove_expense)
   form?.querySelector('[data-edit="save"]')?.removeEventListener('click', save_expense)
@@ -88,7 +101,10 @@ function edit_expense(e: Event) {
 
 function expense_adder() {
   const expense_list = document.getElementById('expenses')
-  expense_list!.insertAdjacentHTML('beforeend', expense('expense', "0", 'New Expense'))
+  const table = document.querySelector('table > tbody')
+  todos++
+  expense_list!.insertAdjacentHTML('beforeend', expense(`Expense ${todos}`, "0", `Details for Expense ${todos}`))
+  table!.insertAdjacentHTML('beforeend', expense_row_template(`Expense ${todos}`, "0", `Details for Expense ${todos}`))
   const exp = expense_list!.lastElementChild!
   const removalButton = exp.querySelector('[data-edit="delete"]')
   removalButton!.addEventListener('click', (e) => remove_expense(e))
