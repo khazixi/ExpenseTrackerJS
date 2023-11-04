@@ -27,25 +27,23 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 const expense = (name: string, amount: string, desc: string) => `
   <div>
     <h2> ${name} </h2>
-    <h3> ${amount} </h3>
+    <h3> Amount: <span> ${amount} </span> </h3>
     <p> Description: <span> ${desc} </span> </p>
     <button data-edit="delete"> Remove Expense </button>
-    <button data-edit="change"> Edit </button>
+    <button data-edit="edit"> Edit </button>
   </div>
 `
 
-const editable_expense = (name: string, amount: string, desc: string) => `
+const editable_expense = (name: string, amount: number, desc: string) => `
   <form onsubmit="return false">
-    <label for="name"> ${name} </label>
-    <input type="text" name="name"/>
+    <label for="name"> Name </label>
+    <input type="text" name="name" value="${name}"/>
     <br>
-    <label for="amount"> ${amount} </label>
-    <input type="number" name="amount"/>
+    <label for="amount"> Amount </label>
+    <input type="number" name="amount" value="${amount}"/>
     <br>
     <label for="description"> Description: </label>
-    <textarea name="description">
-      ${desc}
-    </textarea>
+    <textarea name="description">${desc}</textarea>
     <br>
     <button data-edit="delete"> Remove Expense </button>
     <button data-edit="save"> Save </button>
@@ -54,7 +52,7 @@ const editable_expense = (name: string, amount: string, desc: string) => `
 
 function remove_expense(e: Event) {
   const elem = e.target as HTMLButtonElement
-  const exp = elem.closest('div')
+  const exp = elem.parentElement
   exp!.remove()
 }
 
@@ -76,8 +74,8 @@ function save_expense(e: Event) {
 function edit_expense(e: Event) {
   const elem = e.target as HTMLButtonElement
   const exp = elem.closest('div')
-  const name = exp?.querySelector('h3')?.textContent
-  const amount = exp?.querySelector('h2')?.textContent
+  const name = exp?.querySelector('h2')?.textContent
+  const amount = parseFloat(exp?.querySelector('h3 > span')?.textContent!)
   const desc = exp?.querySelector('p > span')?.textContent
   exp?.querySelector('[data-edit="delete"]')?.removeEventListener('click', remove_expense)
   exp?.querySelector('[data-edit="edit"]')?.removeEventListener('click', edit_expense)
@@ -94,7 +92,7 @@ function expense_adder() {
   const exp = expense_list!.lastElementChild!
   const removalButton = exp.querySelector('[data-edit="delete"]')
   removalButton!.addEventListener('click', (e) => remove_expense(e))
-  const editButton = exp.querySelector('[data-edit="change"]')
+  const editButton = exp.querySelector('[data-edit="edit"]')
   editButton!.addEventListener('click', (e) => edit_expense(e))
 }
 
